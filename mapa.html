@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="Estilos.css">
+  <title>Globo Carbono 3D</title>
+  <script src="datos.js"></script>
+  <script src="https://unpkg.com/globe.gl"></script>
+</head>
+<body>
+  <nav class="menu-navegacion">
+    <div class="logo">🌍 EcoCarbon</div>
+    <ul class="enlaces-menu">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="tipos.html">Tipos de Carbono</a></li>
+      <li><a href="impactos.html">Impactos de Potencias</a></li>
+      <li><a href="mapa.html" class="activo">Globo 3D</a></li>
+      <li><a href="soluciones.html">Soluciones y Recomendaciones</a></li>
+    </ul>
+  </nav>
+  <div id="fondo-exterior"></div>
+
+  <div class="cabecera">
+    <h1>Mapa Global del Carbono</h1>
+    <p>Haz clic en un país o búscalo para ver su análisis detallado.</p>
+  </div>
+
+  <div class="contenedor-globo" id="contenedor">
+    <div id="loading">Cargando Planeta...</div>
+    <div id="interfaz-globo">
+      <div id="controles">
+        <div class="buscador-wrapper">
+          <input type="text" id="buscador" placeholder="Buscar país (ej. Panama)...">
+          <span id="btn-limpiar" title="Borrar búsqueda">✖</span>
+        </div>
+        <button id="btn-buscar">Buscar</button>
+        <button id="btn-rotacion">⏸ Pausar</button>
+      </div>
+    </div>
+    <div id="fondo-interior"></div>
+
+    <div id="vista-pais">
+      <button id="btn-volver">⬅ Volver al Globo</button>
+      
+      <h1 id="vp-titulo">Nombre del País</h1>
+      
+      <div class="grid-cajas">
+        <div class="caja">
+          <h3>Descripción General</h3>
+          <p id="vp-desc"></p>
+        </div>
+        
+        <div class="caja">
+          <h3>Estado de Carbono</h3>
+          <h2 id="vp-estado" style="margin: 5px 0;">POSITIVO</h2>
+        </div>
+        
+        <div class="caja">
+          <h3>Predicción a 50 años</h3>
+          <p id="vp-prediccion"></p> 
+          <button id="btn-catastrofe" class="btn-accion" data-img="">Ver escenario catastrófico</button>
+        </div>
+        
+        <div class="caja">
+          <h3>Medidas Actuales</h3>
+          <p id="vp-medidas"></p>
+          <button id="btn-ecologico" class="btn-accion" data-img="">Ver escenario ecológico</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="globeViz"></div>
+  </div> 
+<div id="tooltip-busqueda" style="display: none;"></div>
+  <div id="leyenda">
+    <center><h2 style="margin: 0; font-size: 16px;">Huella de Carbono</h2></center>
+    <div class="item-leyenda">
+      <span class="punto rojo"></span>Emisor&nbsp;&nbsp;
+      <span class="punto verde"></span>Absorbe&nbsp;&nbsp;
+      <span class="punto amarillo"></span>Neutral&nbsp;&nbsp;
+      <span class="punto gris"></span>Sin Datos
+    </div>
+  </div>
+  <script>
+  
+
+    fetch('https://raw.githubusercontent.com/vasturiano/globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson')
+      .then(res => res.json())
+      .then(countries => {
+        
+        // Ocultar mensaje de carga
+        document.getElementById('loading').style.display = 'none';
+
+        //todo lo del globo
+        const contenedorGlobo = document.getElementById('globeViz');
+        const world = Globe()
+         (contenedorGlobo)
+          .width(contenedorGlobo.clientWidth)   // Le damos el ancho exacto de la caja
+          .height(contenedorGlobo.clientHeight) // Le damos el alto exacto de la caja
+          
+          // IMÁGENES DE ALTA CALIDAD (HTTPS)
+          .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+          .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+          .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+
+          // CONFIGURACIÓN DE POLÍGONOS (PAÍSES)
+          .polygonsData(countries.features.filter(d => d.properties.NAME !== 'Antarctica')) // Excluimos Antártida para estética
+          .polygonAltitude(0.01)
+          .polygonCapColor(d => {
+            const countryName = d.properties.NAME;
+            return carbonData[countryName] ? carbonData[countryName].color : 'rgba(255,255,255, 0.05)'; // Color base transparente
+          })
+          .polygonSideColor(() => 'rgba(0,0,0, 0.5)')
+          .polygonStrokeColor(() => '#333')
+          
+          // ETIQUETAS AL PASAR EL MOUSE
+          .polygonLabel(({ properties: d }) => generarContenidoLabel(d))
+
+        // ETIQUETAS
+        function generarContenidoLabel(d) {
+          const data = carbonData[d.NAME];
+          if (data) {
+            return `
+              <div style="background: rgba(0,0,0,0.9); color: white; padding: 12px; border-radius: 6px; border: 1px solid ${data.color}; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.6);">
+                <h3 style="margin:0 0 5px 0; color: ${data.color}">${d.NAME}</h3>
+                <b>${data.status}</b><br/>
+                <i>${data.descHover}</i>
+              </div>
+            `;
+          }
+          return `
+            <div style="background: rgba(40,40,40,0.9); color: #ccc; padding: 8px 12px; border-radius: 4px; border: 1px solid #666; font-family: sans-serif;">
+              <h3 style="margin:0 0 5px 0; color: #fff">${d.NAME}</h3>
+              Sin datos específicos
+            </div>
+          `;
+        }
+          //INTERACCIÓN Y CONTROLES UNIFICADOS 
+        let paisBuscado = null; // Guardará el país que buscamos para mantenerlo levantado
+        // Función central que decide qué país se levanta y colorea
+        function actualizarVisuales(hoverD = null) {
+          world
+            .polygonAltitude(d => (d === hoverD || d === paisBuscado) ? 0.08 : 0.01)
+            .polygonCapColor(d => {
+              if (d === hoverD || d === paisBuscado) return 'steelblue'; // Color al resaltar
+              const countryName = d.properties.NAME;
+              return carbonData[countryName] ? carbonData[countryName].color : 'rgba(255,255,255, 0.05)';
+            });
+        }
+
+        // Hover del mouse normal
+        world.onPolygonHover(hoverD => {
+          actualizarVisuales(hoverD);
+        });
+
+        // Controles de Rotación
+        let rotando = true;
+        const btnRotacion = document.getElementById('btn-rotacion');
+        btnRotacion.addEventListener('click', () => {
+          rotando = !rotando;
+          world.controls().autoRotate = rotando;
+          btnRotacion.innerText = rotando ? '⏸ Pausar' : '▶ Rotar';
+        });
+        //logica del buscador
+      const vistaPais = document.getElementById('vista-pais');
+        const interfazGlobo = document.getElementById('interfaz-globo');
+        const fondoInterior = document.getElementById('fondo-interior');
+        const fondoExterior = document.getElementById('fondo-exterior');
+        let temporizadorPausa = null; // Para controlar cuándo se pausa el globo
+
+        // Imagen por defecto del país
+        const imagenDefecto = "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=1000&auto=format&fit=crop";
+
+        function abrirDetallePais(paisData) {
+          // Si no hay datos, ponemos unos por defecto
+          const data = carbonData[paisData.NAME] || { 
+            status: 'Desconocido', color: '#aaa', descGeneral: 'No hay datos disponibles.', 
+            prediccion: 'Sin datos.', medidas: 'Sin datos.',
+            imgDefecto: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80',
+            imgCatastrofe: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9cce?q=80',
+            imgEcologia: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80'
+          };
+
+          interfazGlobo.style.display = 'none';
+
+          // Llenamos las 4 cajas con los datos del archivo datos.js
+          document.getElementById('vp-titulo').innerText = paisData.NAME;
+          document.getElementById('vp-estado').innerText = data.status;
+          document.getElementById('vp-estado').style.color = data.color;
+          document.getElementById('vp-desc').innerText = data.descGeneral;
+          document.getElementById('vp-prediccion').innerText = data.prediccion;
+          document.getElementById('vp-medidas').innerText = data.medidas;
+          //imágenes correspondientes a los botones
+          document.getElementById('btn-catastrofe').setAttribute('data-img', data.imgCatastrofe);
+          document.getElementById('btn-ecologico').setAttribute('data-img', data.imgEcologia);
+
+          fondoInterior.style.backgroundImage = `url('${data.imgDefecto}')`;
+          fondoExterior.style.backgroundImage = `url('${data.imgDefecto}')`;
+          
+          vistaPais.classList.add('activa');
+          fondoInterior.style.opacity = '0.3'; 
+          fondoExterior.style.opacity = '0.8'; 
+        }
+
+        //BOTÓN DE VOLVER 
+        document.getElementById('btn-volver').addEventListener('click', () => {
+          //Ocultar la vista y fondos
+          vistaPais.classList.remove('activa');
+          fondoInterior.style.opacity = '0';
+          fondoExterior.style.opacity = '0';
+          rotando=!rotando;
+          world.controls().autoRotate=rotando;
+          btnRotacion.innerText = rotando ? '⏸ Pausar' : '▶ Rotar';
+          //Esperar 1 segundos antes de reanudar el globo y mostrar interfaz
+          setTimeout(() => {
+            interfazGlobo.style.display = 'block'; 
+            console.log("Globo reanudado.");
+          }, 1000);
+        });
+
+        //BOTONES PARA CAMBIAR EL FONDO 
+        const botonesAccion = document.querySelectorAll('.btn-accion');
+        botonesAccion.forEach(boton => {
+          boton.addEventListener('click', (e) => {
+            const nuevaImagen = e.target.getAttribute('data-img');
+            fondoInterior.style.backgroundImage = `url('${nuevaImagen}')`;
+            fondoExterior.style.backgroundImage = `url('${nuevaImagen}')`;
+          });
+        });
+        // CLIC EN EL GLOBO
+        world.onPolygonClick(d => {
+          // Calcular centro del país para que la cámara viaje
+          const geometry = d.geometry;
+          let coords = geometry.type === 'Polygon' ? geometry.coordinates[0] : geometry.coordinates[0][0];
+          let latSum = 0, lngSum = 0;
+          coords.forEach(c => { lngSum += c[0]; latSum += c[1]; });
+          world.pointOfView({ lat: latSum / coords.length, lng: lngSum / coords.length, altitude: 1.2 }, 1500);
+          rotando = !rotando;
+          world.controls().autoRotate = rotando;
+          // Abrir la interfaz
+          abrirDetallePais(d.properties);
+        });
+
+        // --- EVENTO: BUSCADOR ---
+        const inputBuscador = document.getElementById('buscador');
+        document.getElementById('btn-buscar').addEventListener('click', () => {
+          const termino = inputBuscador.value.toLowerCase().trim();
+          if (!termino) return;
+
+          const pais = countries.features.find(d => d.properties.NAME.toLowerCase().includes(termino));
+          if (pais) {
+            const geometry = pais.geometry;
+            let coords = geometry.type === 'Polygon' ? geometry.coordinates[0] : geometry.coordinates[0][0];
+            let latSum = 0, lngSum = 0;
+            coords.forEach(c => { lngSum += c[0]; latSum += c[1]; });
+            
+            world.pointOfView({ lat: latSum / coords.length, lng: lngSum / coords.length, altitude: 1.2 }, 1500);
+            rotando = !rotando;
+            world.controls().autoRotate = rotando;
+          // Abrir interfaz igual que si hubiéramos hecho clic
+            abrirDetallePais(pais.properties);
+          } else {
+            alert('País no encontrado.');
+          }
+        });
+
+        // Que la 'X' de borrar siga funcionando
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        inputBuscador.addEventListener('input', () => {
+          btnLimpiar.style.display = inputBuscador.value.length > 0 ? 'block' : 'none';
+        });
+        btnLimpiar.addEventListener('click', () => {
+          inputBuscador.value = '';
+          btnLimpiar.style.display = 'none';
+          inputBuscador.focus();
+        });
+
+        inputBuscador.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') document.getElementById('btn-buscar').click();
+        });
+        
+        // Configuración de la cámara y controles
+        world.controls().autoRotate = true;
+        world.controls().autoRotateSpeed = 0.8;
+        world.controls().maxDistance = 400;
+        world.controls().minDistance = 200;
+        // Efecto de atmósfera
+        world.atmosphereColor('#3a228a');
+        world.atmosphereAltitude(0.15);
+      });
+      // Mantiene el globo centrado si se cambia el tamaño de la ventana o eso deberia
+        window.addEventListener('resize', () => {
+          world.width(contenedorGlobo.clientWidth);
+          world.height(contenedorGlobo.clientHeight);
+        });
+        window.addEventListener('resize', () => {
+  world.width(contenedorGlobo.clientWidth);
+  world.height(contenedorGlobo.clientHeight);
+});
+  </script>
+  <script src="cuestionario.js"></script>
+</body>
+</html>

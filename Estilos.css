@@ -282,6 +282,8 @@
   padding: 8px 15px;
   border-radius: 6px;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .enlaces-menu li a:hover {
@@ -485,7 +487,7 @@
   line-height: 1.6;
 }
 
-/* Responsive para celulares */
+/* tipos celulares */
 @media (max-width: 600px) {
   .item-tipo {
     flex-direction: column;
@@ -573,7 +575,35 @@
   background: var(--color-potencia);
   box-shadow: 0 0 10px var(--color-potencia);
 }
+@media (max-width: 850px) {
+  /* Hacemos el menú vertical para que quepa todo */
+  .menu-navegacion {
+    flex-direction: column; /* Apila el logo y los enlaces */
+    padding: 15px 10px;
+    gap: 15px;
+  }
+  
+  .enlaces-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
 
+  .enlaces-menu li a {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  body {
+    padding-top: 160px !important; 
+  }
+
+  .grid-potencias {
+    grid-template-columns: 1fr; 
+    gap: 20px;
+    padding: 0 10px;
+  }
+}
 /* --- ESTILOS PÁGINA SOLUCIONES --- */
 
 .pagina-soluciones {

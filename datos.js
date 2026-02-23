@@ -5,8 +5,10 @@ const carbonData = {
     color: '#ff3333', 
     descHover: 'Alta emisión industrial.', // Para el cuadrito al pasar el mouse
     descGeneral: 'Estados Unidos es uno de los mayores emisores históricos debido a su alta industrialización, dependencia del automóvil y consumo energético per cápita.', // Para la caja 1
-    prediccion: 'Si no se reducen drásticamente las emisiones, se enfrentarán a sequías más extremas, huracanes devastadores y pérdida de costas.', // Para la caja 3
-    medidas: 'Están implementando leyes masivas para subsidiar la energía solar, eólica y la adopción de vehículos eléctricos.', // Para la caja 4
+    prediccion: 'Si no se reducen drásticamente las emisiones, se enfrentarán a sequías más extremas, huracanes devastadores y pérdida de costas.',
+    prediccionExtendida: 'Si Estados Unidos no acelera la reducción de emisiones, se proyecta un aumento significativo en la frecuencia e intensidad de eventos climáticos extremos hacia mediados y finales de siglo. Esto incluye sequías más prolongadas en el oeste, huracanes más intensos en el Atlántico y Golfo de México, aumento del nivel del mar que amenaza zonas costeras densamente pobladas, y mayores olas de calor.',
+    medidas: 'Están implementando leyes masivas para subsidiar la energía solar, eólica y la adopción de vehículos eléctricos.',
+    medidasExtendida: 'Estados Unidos ha aprobado políticas climáticas de gran escala, incluyendo subsidios e incentivos para energía solar, eólica, almacenamiento en baterías y vehículos eléctricos, así como normas más estrictas de eficiencia energética. También se están desarrollando proyectos de captura y almacenamiento de carbono y modernización de la red eléctrica. Sin embargo, el país aún mantiene una producción significativa de petróleo y gas, por lo que el impacto neto dependerá de la rapidez con que las energías limpias sustituyan a los combustibles fósiles.',
     imgDefecto: 'https://elordenmundial.com/wp-content/webp-express/webp-images/doc-root/wp-content/uploads/2017/01/7I0fP5W-1024x640.jpg.webp',
     imgCatastrofe: 'https://www.lavanguardia.com/files/article_main_microformat/uploads/2020/01/22/5fa903701cf8a.jpeg',
     imgEcologia: 'https://cdn.elperiodicodelaenergia.com/2024/08/66c76ac1d6403065673820d1.jpg'

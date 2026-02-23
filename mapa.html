@@ -206,9 +206,9 @@
           document.getElementById('vp-medidas').innerText = data.medidas;
           //imágenes correspondientes a los botones
           document.getElementById('btn-catastrofe').setAttribute('data-img', data.imgCatastrofe);
-          document.getElementById('btn-catastrofe').setAttribute('data-texto', data.prediccion);
+          document.getElementById('btn-catastrofe').setAttribute('data-texto', data.prediccionExtendida);
           document.getElementById('btn-ecologico').setAttribute('data-img', data.imgEcologia);
-          document.getElementById('btn-ecologico').setAttribute('data-texto', data.medidas);
+          document.getElementById('btn-ecologico').setAttribute('data-texto', data.medidasExtendida);
           //imagen del fondo del globo y imagen borrosa
           fondoInterior.style.backgroundImage = `url('${data.imgDefecto}')`;
           fondoExterior.style.backgroundImage = `url('${data.imgDefecto}')`;

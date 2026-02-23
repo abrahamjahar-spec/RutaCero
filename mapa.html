@@ -59,7 +59,7 @@
         <div class="caja">
           <h3>Predicción a 50 años</h3>
           <p id="vp-prediccion"></p> 
-          <button id="btn-catastrofe" class="btn-accion" data-img="">Ver escenario catastrófico</button>
+          <button id="btn-catastrofe" class="btn-accion" data-img="">Ver escenario futuro</button>
         </div>
         
         <div class="caja">
@@ -67,6 +67,15 @@
           <p id="vp-medidas"></p>
           <button id="btn-ecologico" class="btn-accion" data-img="">Ver escenario ecológico</button>
         </div>
+      </div>
+    </div>
+
+    <div id="modal-escenario" class="modal-oculto">
+      <div class="modal-contenido">
+        <h2 id="modal-titulo">Escenario Proyectado</h2>
+        <img id="modal-imagen" src="" alt="Simulación del Escenario">
+        <p id="modal-texto">Cargando simulación...</p>
+        <button id="btn-cerrar-modal">Entendido</button>
       </div>
     </div>
 
@@ -181,9 +190,9 @@
           const data = carbonData[paisData.NAME] || { 
             status: 'Desconocido', color: '#aaa', descGeneral: 'No hay datos disponibles.', 
             prediccion: 'Sin datos.', medidas: 'Sin datos.',
-            imgDefecto: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80',
-            imgCatastrofe: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9cce?q=80',
-            imgEcologia: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80'
+            imgDefecto: 'https://amp.protocolo.org/extfiles/proto-621-887668.jpg',
+            imgCatastrofe: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSb628dVfBhr_75KDsknkJwW-z3cjO6aqPwgg&s',
+            imgEcologia: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2QdEkXE3D20rQX0FBDxbXsPprp0j3jXUO_Q&s'
           };
 
           interfazGlobo.style.display = 'none';
@@ -197,8 +206,10 @@
           document.getElementById('vp-medidas').innerText = data.medidas;
           //imágenes correspondientes a los botones
           document.getElementById('btn-catastrofe').setAttribute('data-img', data.imgCatastrofe);
+          document.getElementById('btn-catastrofe').setAttribute('data-texto', data.prediccion);
           document.getElementById('btn-ecologico').setAttribute('data-img', data.imgEcologia);
-
+          document.getElementById('btn-ecologico').setAttribute('data-texto', data.medidas);
+          //imagen del fondo del globo y imagen borrosa
           fondoInterior.style.backgroundImage = `url('${data.imgDefecto}')`;
           fondoExterior.style.backgroundImage = `url('${data.imgDefecto}')`;
           
@@ -224,13 +235,49 @@
         });
 
         //BOTONES PARA CAMBIAR EL FONDO 
+        const modalEscenario = document.getElementById('modal-escenario');
+        const modalTitulo = document.getElementById('modal-titulo');
+        const modalImagen = document.getElementById('modal-imagen');
+        const modalTexto = document.getElementById('modal-texto');
+        const btnCerrarModal = document.getElementById('btn-cerrar-modal');
         const botonesAccion = document.querySelectorAll('.btn-accion');
         botonesAccion.forEach(boton => {
           boton.addEventListener('click', (e) => {
             const nuevaImagen = e.target.getAttribute('data-img');
-            fondoInterior.style.backgroundImage = `url('${nuevaImagen}')`;
-            fondoExterior.style.backgroundImage = `url('${nuevaImagen}')`;
+            const textoEspecifico = e.target.getAttribute('data-texto')
+            // Detectar si el usuario hizo clic en el botón catastrófico o ecológico
+            const esCatastrofe = e.target.innerText.toLowerCase().includes('catastrófico');
+            // Cargar la imagen clara
+            modalImagen.src = nuevaImagen;
+            //Cambiar el texto y los colores según el escenario
+            if (esCatastrofe) {
+              modalTitulo.innerText = "🚨 Escenario Catastrófico a 50 años";
+              modalTitulo.style.color = "#ff4d4d"; 
+              
+              if (textoEspecifico && textoEspecifico !== "Sin datos.") {
+                modalTexto.innerText = textoEspecifico;
+              } else {
+                // Texto genérico si no hay datos
+                modalTexto.innerText = "Si no se toman medidas drásticas, el aumento de las temperaturas provocará eventos climáticos extremos, pérdida masiva de biodiversidad y el hundimiento de zonas costeras en este territorio.";
+              }
+            } else {
+              modalTitulo.innerText = "🌱 Escenario Ecológico (Ruta Cero)";
+              modalTitulo.style.color = "#00ff88";
+              
+              if (textoEspecifico && textoEspecifico !== "Sin datos.") {
+                modalTexto.innerText = textoEspecifico;
+              } else {
+                // Texto genérico si no hay datos
+                modalTexto.innerText = "Al aplicar políticas estrictas de carbono neutralidad y transición energética, este país logrará estabilizar su ecosistema, limpiar su aire y asegurar un futuro sostenible.";
+              }
+            }
+            //Mostrar la ventana
+            modalEscenario.classList.remove('modal-oculto');
           });
+        });
+        // Botón para cerrar la ventana
+        btnCerrarModal.addEventListener('click', () => {
+          modalEscenario.classList.add('modal-oculto');
         });
         // CLIC EN EL GLOBO
         world.onPolygonClick(d => {
@@ -240,13 +287,13 @@
           let latSum = 0, lngSum = 0;
           coords.forEach(c => { lngSum += c[0]; latSum += c[1]; });
           world.pointOfView({ lat: latSum / coords.length, lng: lngSum / coords.length, altitude: 1.2 }, 1500);
-          rotando = !rotando;
+          rotando = false;
           world.controls().autoRotate = rotando;
           // Abrir la interfaz
           abrirDetallePais(d.properties);
         });
 
-        // --- EVENTO: BUSCADOR ---
+        // EVENTO BUSCADOR 
         const inputBuscador = document.getElementById('buscador');
         document.getElementById('btn-buscar').addEventListener('click', () => {
           const termino = inputBuscador.value.toLowerCase().trim();
@@ -260,7 +307,7 @@
             coords.forEach(c => { lngSum += c[0]; latSum += c[1]; });
             
             world.pointOfView({ lat: latSum / coords.length, lng: lngSum / coords.length, altitude: 1.2 }, 1500);
-            rotando = !rotando;
+            rotando = false;
             world.controls().autoRotate = rotando;
           // Abrir interfaz igual que si hubiéramos hecho clic
             abrirDetallePais(pais.properties);
@@ -304,5 +351,8 @@
 });
   </script>
   <script src="cuestionario.js"></script>
+  <footer class="footer-creditos">
+    <p>Mapa Global del Carbono| <a href="fuentes.html">Fuentes y Referencias</a></p>
+  </footer>
 </body>
 </html>

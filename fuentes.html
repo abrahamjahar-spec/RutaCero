@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuentes y Referencias</title>
+  <link rel="stylesheet" href="estilos.css">
+  <style>
+    
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      padding: 40px 20px;
+      padding-top: 100px; 
+    }
+    .contenedor-fuentes {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #161b22;
+      padding: 40px;
+      border-radius: 12px;
+      border: 1px solid #30363d;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    h1, h2 { color: #fff; }
+    h1 { text-align: center; margin-bottom: 40px; color: #00ff88; }
+    ul { line-height: 1.8; }
+    a { color: #58a6ff; text-decoration: none; word-wrap: break-word;}
+    a:hover { text-decoration: underline; }
+    .pais-titulo { font-weight: bold; color: #ffcc00; margin-top: 15px;}
+  </style>
+</head>
+<body>
+
+  <div class="contenedor-fuentes">
+    <h1>Fuentes y Referencias</h1>
+
+    <h2>📚 Datos de Emisiones e Información General</h2>
+    <ul>
+      <li>Datos globales de emisiones de CO2: <a href="https://ourworldindata.org/co2-emissions" target="_blank">Our World in Data</a></li>
+      <li>Información sobre políticas ambientales: <a href="https://www.unep.org/" target="_blank">ONU Medio Ambiente</a></li>
+    </ul>
+    <h2>📚 Fuentes de los tipos de carbono</h2>
+    <ul>
+      <li>Carbon Azul: <a href="https://www.iaea.org/es/newscenter/news/que-es-el-carbono-azul" target="_blank">Organismo Internacional de Energía Atómica</a></li>
+      <li>Carbon Verde Azulado: <a href="https://india.mongabay.com/2024/10/explainer-what-is-teal-carbon/" target="_blank">Mongabay</a></li>
+      <li>Carbon Verde: <a href="https://absorbeco2.com/por-que-invertir-en-carbono/" target="_blank">Absorbeco2</a></li>
+      <li>Carbon Negro/gris: <a href="https://www.ccacoalition.org/es/short-lived-climate-pollutants/black-carbon" target="_blank">Climate and Clean Air Coalition (CCAC)</a></li>
+    </ul>
+    <hr style="border-color: #30363d; margin: 40px 0;">
+
+    <h2>🖼️ Fuentes de Imágenes por País</h2>
+    <p>Las siguientes imágenes fueron utilizadas para ilustrar los escenarios actuales, catastróficos y ecológicos en el globo 3D:</p>
+    
+    <ul id="lista-imagenes"></ul>
+
+  </div>
+
+  <div style="text-align: center; margin-top: 30px;">
+    <a href="index.html" style="color: #00ff88; font-size: 1.1rem;">⬅ Volver a la pagina principal</a>
+  </div>
+
+  <script src="datos.js"></script>
+  
+  <script>
+    const listaImagenes = document.getElementById('lista-imagenes');
+
+    for (const [pais, info] of Object.entries(carbonData)) {
+      
+      
+      const elementoPais = document.createElement('li');
+      elementoPais.classList.add('pais-titulo');
+      elementoPais.innerText = pais;
+      listaImagenes.appendChild(elementoPais);
+
+      const subLista = document.createElement('ul');
+      
+      if(info.imgDefecto) subLista.innerHTML += `<li><b>Fondo Actual:</b> <a href="${info.imgDefecto}" target="_blank">Ver imagen original</a></li>`;
+      if(info.imgCatastrofe) subLista.innerHTML += `<li><b>Escenario Catastrófico:</b> <a href="${info.imgCatastrofe}" target="_blank">Ver imagen original</a></li>`;
+      if(info.imgEcologia) subLista.innerHTML += `<li><b>Escenario Ecológico:</b> <a href="${info.imgEcologia}" target="_blank">Ver imagen original</a></li>`;
+      
+      listaImagenes.appendChild(subLista);
+    }
+  </script>
+
+</body>
+</html>
